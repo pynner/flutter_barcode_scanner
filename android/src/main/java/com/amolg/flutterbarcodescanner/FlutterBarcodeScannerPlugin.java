@@ -2,7 +2,9 @@ package com.amolg.flutterbarcodescanner;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -13,6 +15,8 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
+
+import org.json.JSONObject;
 
 import java.util.Map;
 
@@ -155,16 +159,16 @@ public class FlutterBarcodeScannerPlugin implements MethodCallHandler, ActivityR
                         pendingResult.success(barcodeResult);
 
                         // save the barcode to the FlutterSharedPreferences for state loss support
-                        val sharedPreferences = activity.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-                        val editor = sharedPreferences.edit()
-                        val jsonString = """
-                        {
-                           "from":"BarcodeScanner",
-                           "data":" """ + barcodeResult + """"
-                        }
-                        """
-                        editor.putString("flutter.external_result", jsonString)
-                        editor.apply()
+                        SharedPreferences sharedPreferences = activity.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("from", "BarcodeScanner");
+                        jsonObject.put("data", barcodeResult);
+                        String jsonString = jsonObject.toString();
+
+                        editor.putString("flutter.external_result", jsonString);
+                        editor.apply();
                     } catch (Exception e) {
                         pendingResult.success("-1");
                     }
