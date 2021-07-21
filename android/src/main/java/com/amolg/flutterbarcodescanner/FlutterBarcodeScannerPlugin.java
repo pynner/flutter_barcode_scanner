@@ -153,6 +153,18 @@ public class FlutterBarcodeScannerPlugin implements MethodCallHandler, ActivityR
                         Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
                         String barcodeResult = barcode.rawValue;
                         pendingResult.success(barcodeResult);
+
+                        // save the barcode to the FlutterSharedPreferences for state loss support
+                        val sharedPreferences = activity.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                        val editor = sharedPreferences.edit()
+                        val jsonString = """
+                        {
+                           "from":"BarcodeScanner",
+                           "data":" """ + barcodeResult + """"
+                        }
+                        """
+                        editor.putString("flutter.external_result", jsonString)
+                        editor.apply()
                     } catch (Exception e) {
                         pendingResult.success("-1");
                     }
